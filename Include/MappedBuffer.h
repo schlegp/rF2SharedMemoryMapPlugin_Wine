@@ -236,11 +236,15 @@ private:
     }
 
     HANDLE hMap = INVALID_HANDLE_VALUE;
+    
+    char wineFileName[MAX_PATH] = {};
+    sprintf(wineFileName, R"(/dev/shm/%s)", fileName);
+    HANDLE hMapFile = ::CreateFileA(wineFileName, GENERIC_READ | GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL); // Backing file for SharedMemory
     if (!isDedicatedServer  // Regular client use.
       || (isDedicatedServer && !dedicatedServerMapGlobally)) {  // Dedicated, but no global mapping requested.
       // Init handle and try to create, read if existing.
       hMap = ::CreateFileMappingA(
-        INVALID_HANDLE_VALUE,
+        hMapFile,
         nullptr  /*lpFileMappingAttributes*/,
         PAGE_READWRITE,
         0  /*dwMaximumSizeLow*/,
